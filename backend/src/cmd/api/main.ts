@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import { createApp } from './app.js';
 import { RedisRepository } from '../../internal/repository/redis.js';
-import { QdrantRepository } from '../../internal/repository/qdrant.js';
 import { GeminiAnalyzer } from '../../internal/analyzer/gemini.js';
 import { AnalysisOrchestrator } from '../../internal/service/orchestrator.js';
 

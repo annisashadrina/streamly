@@ -63,11 +63,11 @@ const GlobalStyles = createGlobalStyle`
 
 // --- MOCK DATA ---
 const MOCK_DATA = {
-  "5m": { sentiment_score: 0.85, sentiment_trend: "rising", emerging_topics: ["new feature", "tutorial", "so cool!"], summary: "Audience shows high enthusiasm for a newly demonstrated feature, with many asking for a tutorial.", actionable_insight: "Consider pinning a comment with a link to the feature documentation or a tutorial video.", message_count: 14200, created_at: new Date(Date.now() - 2 * 60 * 1000).toISOString() },
-  "20m": { sentiment_score: 0.72, sentiment_trend: "stable", emerging_topics: ["product quality", "shipping", "discount"], summary: "Viewers are curious about product details and pricing. Multiple requests for discount codes.", actionable_insight: "Announce a limited-time promo code to convert curious viewers into buyers.", message_count: 9800, created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString() },
-  "45m": { sentiment_score: 0.61, sentiment_trend: "falling", emerging_topics: ["slow response", "audio issue", "left stream"], summary: "Technical issues are causing viewer drop-off. Sentiment declining over the session.", actionable_insight: "Address the audio quality issue verbally and consider a brief stream restart if it persists.", message_count: 31400, created_at: new Date(Date.now() - 40 * 60 * 1000).toISOString() }
+  "5m": { id: "mock-5m", batch_type: "5m", sentiment_score: 0.85, sentiment_trend: "rising", emerging_topics: ["new feature", "tutorial", "so cool!"], summary: "Audience shows high enthusiasm for a newly demonstrated feature, with many asking for a tutorial.", actionable_insight: "Consider pinning a comment with a link to the feature documentation or a tutorial video.", message_count: 14200, created_at: new Date(Date.now() - 2 * 60 * 1000).toISOString() },
+  "20m": { id: "mock-20m", batch_type: "20m", sentiment_score: 0.72, sentiment_trend: "stable", emerging_topics: ["product quality", "shipping", "discount"], summary: "Viewers are curious about product details and pricing. Multiple requests for discount codes.", actionable_insight: "Announce a limited-time promo code to convert curious viewers into buyers.", message_count: 9800, created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString() },
+  "45m": { id: "mock-45m", batch_type: "45m", sentiment_score: 0.61, sentiment_trend: "falling", emerging_topics: ["slow response", "audio issue", "left stream"], summary: "Technical issues are causing viewer drop-off. Sentiment declining over the session.", actionable_insight: "Address the audio quality issue verbally and consider a brief stream restart if it persists.", message_count: 31400, created_at: new Date(Date.now() - 40 * 60 * 1000).toISOString() }
 };
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // --- SHARED HELPER & UI COMPONENTS ---
 const SkeletonPlaceholder = ({ className, children }) => (
@@ -277,13 +277,30 @@ const Toast = ({ message, show }) => (
 );
 
 // --- APP LAYOUT & ROUTING ---
-const AppLayout = ({ username, error, isDemoMode, handleLogout }) => (
+const AppLayout = ({ username, error, isDemoMode, setIsDemoMode, handleLogout, insightData, setInsightData }) => (
     <div className="bg-gray-50 min-h-screen pb-24" style={{ maxWidth: '390px', margin: '0 auto' }}>
         <Toast message={error} show={!!error} />
-        {isDemoMode && <div className="bg-yellow-200 text-yellow-800 text-center text-xs py-1 sticky top-0 z-30">Demo Mode</div>}
+        {isDemoMode && (
+            <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs py-1.5 px-3 sticky top-0 z-30 font-medium flex items-center justify-between shadow-sm">
+                <span className="flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                    ⚡ Mode Demo (Data Simulasi)
+                </span>
+                <button
+                    onClick={() => {
+                        const next = !isDemoMode;
+                        setIsDemoMode(next);
+                        localStorage.setItem("streamly_demo_mode", next ? "true" : "false");
+                    }}
+                    className="text-[10px] bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold px-2 py-0.5 rounded transition"
+                >
+                    Live Mode
+                </button>
+            </div>
+        )}
         {username && <Header username={username} />}
         <main>
-            <Outlet context={{ handleLogout }} /> {/* Pass handleLogout down to nested routes like AccountPage */}
+            <Outlet context={{ handleLogout, isDemoMode, setIsDemoMode, username, API_URL, MOCK_DATA, insightData, setInsightData }} />
         </main>
         <BottomNav />
     </div>
@@ -292,20 +309,29 @@ const AppLayout = ({ username, error, isDemoMode, handleLogout }) => (
 const StreamlyApp = () => {
     const [username, setUsername] = useState(localStorage.getItem("streamly_username"));
     const [error, setError] = useState(null);
-    const [isDemoMode, setIsDemoMode] = useState(!API_URL);
+    const [isDemoMode, setIsDemoMode] = useState(() => {
+        const saved = localStorage.getItem("streamly_demo_mode");
+        if (saved !== null) return saved === "true";
+        return false;
+    });
     const [insightData, setInsightData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
-    const handleLoginSuccess = (loggedInUsername) => {
+    const handleLoginSuccess = (loggedInUsername, demo = false) => {
         localStorage.setItem("streamly_username", loggedInUsername);
+        localStorage.setItem("streamly_demo_mode", demo ? "true" : "false");
         setUsername(loggedInUsername);
+        setIsDemoMode(demo);
+        setInsightData(null);
         navigate('/'); // Redirect to dashboard after login
     };
 
     const handleLogout = () => {
         localStorage.removeItem("streamly_username");
+        localStorage.removeItem("streamly_demo_mode");
         setUsername(null);
+        setInsightData(null);
         // The ProtectedRoute will automatically redirect to /login
     };
     
@@ -328,7 +354,7 @@ const StreamlyApp = () => {
                 <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
                 
                 <Route element={<ProtectedRoute user={username} />}>
-                    <Route path="/" element={<AppLayout username={username} error={error} isDemoMode={isDemoMode} handleLogout={handleLogout} />}>
+                    <Route path="/" element={<AppLayout username={username} error={error} isDemoMode={isDemoMode} setIsDemoMode={setIsDemoMode} handleLogout={handleLogout} insightData={insightData} setInsightData={setInsightData} />}>
                         <Route index element={<DashboardPage {...dashboardProps} />} />
                         <Route path="analytics" element={<AnalyticsPage />} />
                         <Route path="insights" element={<InsightsPage />} />
