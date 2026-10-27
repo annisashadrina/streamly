@@ -81,6 +81,33 @@ export class AnalysisOrchestrator {
     }
 
     /**
+     * Manually triggers immediate analysis of current messages for @username
+     * without waiting for the 5-minute interval timer.
+     */
+    public async triggerImmediateAnalysis(username: string): Promise<StructuredInsight | null> {
+        console.log(`[ORCHESTRATOR] Manual trigger: Processing immediate 5m batch for @${username}...`);
+        let messages = await this.redisRepo.getAndClearMessageQueue(username);
+        if (messages.length === 0) {
+            // Check recent live messages if queue was already cleared
+            messages = await this.redisRepo.getRecentMessages(username, 30);
+        }
+
+        if (messages.length === 0) {
+            console.log(`[ORCHESTRATOR] No messages available to trigger analysis for @${username}.`);
+            const existing = await this.redisRepo.getLatestInsights(username, '5m', 1);
+            return existing[0] || null;
+        }
+
+        const analysisResult = await this.analyzer.analyze(username, '5m', { messages });
+        if (analysisResult && analysisResult.insight) {
+            await this.redisRepo.saveInsight(username, '5m', analysisResult.insight);
+            console.log(`[ORCHESTRATOR] Manual trigger successfully saved insight for @${username}.`);
+            return analysisResult.insight;
+        }
+        return null;
+    }
+
+    /**
      * The core processing logic for a single analysis batch.
      * It routes to the correct handler based on batch type.
      */

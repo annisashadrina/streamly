@@ -37,19 +37,22 @@ const GlobalStyles = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap');
 
   :root {
-    --bg: #F7F9FB;
+    --bg: #F8FAFC;
     --surface: #FFFFFF;
-    --primary: #00C9B1;
-    --primary-soft: #E6FAF7;
-    --danger: #FF6B6B;
-    --danger-soft: #FFF0F0;
-    --warning: #F5A623;
-    --warning-soft: #FFF8E1;
-    --text-main: #1A1D2E;
-    --text-sub: #8A94A6;
-    --border: #EDF0F4;
-    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
-    --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.10);
+    --primary: #7C3AED;
+    --primary-soft: #F5F3FF;
+    --accent-blue: #3B82F6;
+    --accent-purple: #8B5CF6;
+    --accent-pink: #EC4899;
+    --danger: #EF4444;
+    --danger-soft: #FEF2F2;
+    --warning: #F59E0B;
+    --warning-soft: #FFFBEB;
+    --text-main: #0F172A;
+    --text-sub: #64748B;
+    --border: #E2E8F0;
+    --shadow-card: 0 4px 20px rgba(124, 58, 237, 0.06);
+    --shadow-hover: 0 8px 32px rgba(124, 58, 237, 0.12);
   }
 
   body {
@@ -107,14 +110,37 @@ const AnimatedCounter = ({ value }) => {
     return <span>{displayValue}</span>;
 };
 
-const Header = ({ username }) => (
-    <header className="bg-white p-4 flex justify-between items-center sticky top-0 z-20">
-        <div className="flex items-center">
-            <h1 className="font-bold text-2xl" style={{ fontFamily: 'Plus Jakarta Sans' }}>Overview</h1>
-            <div className="w-2 h-2 bg-teal-500 rounded-full ml-2 animate-pulse"></div>
+const Header = ({ username, user, liveChannel }) => (
+    <header className="bg-white p-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-100 shadow-xs">
+        <div className="flex items-center gap-2.5">
+            <img 
+                src="/streamly-icon.png" 
+                alt="Streamly" 
+                className="w-9 h-9 object-contain flex-shrink-0 drop-shadow-xs hover:scale-105 transition-transform" 
+            />
+            <div>
+                <div className="flex items-center">
+                    <h1 className="font-extrabold text-xl text-slate-900" style={{ fontFamily: 'Plus Jakarta Sans' }}>Overview</h1>
+                    <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full ml-2 animate-pulse"></div>
+                </div>
+                {liveChannel && (
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-ping"></span>
+                        <span className="text-[10px] font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full border border-pink-200/70">
+                            🔴 Live: @{liveChannel}
+                        </span>
+                    </div>
+                )}
+            </div>
         </div>
-        <div className="w-9 h-9 bg-gradient-to-br from-teal-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold">
-            {username.charAt(0).toUpperCase()}
+        <div className="flex items-center gap-2.5">
+            <div className="text-right">
+                <p className="text-xs font-bold text-slate-800 leading-tight">{user?.fullName || username}</p>
+                <p className="text-[10px] text-purple-600 font-bold capitalize">{user?.role ? user.role.replace('_', ' ') : 'Streamer'}</p>
+            </div>
+            <div className="w-9 h-9 bg-gradient-to-tr from-blue-600 via-purple-600 to-pink-500 rounded-full flex items-center justify-center text-white font-extrabold shadow-sm">
+                {(user?.fullName || username || 'S').charAt(0).toUpperCase()}
+            </div>
         </div>
     </header>
 );
@@ -157,9 +183,9 @@ const SentimentCard = ({ data, isLoading, loadingMessage }) => {
                     <span className="text-3xl font-bold text-gray-400 ml-1">%</span>
                 </div>
                 <p className="text-sm text-gray-500 leading-relaxed break-words relative z-10 pb-4">{data.summary}</p>
-                <svg viewBox="0 0 200 50" className="absolute bottom-0 right-0 w-2/3 h-1/2 z-0 opacity-15" preserveAspectRatio="none">
-                    <path d="M0,50 C40,10 60,10 100,30 S160,50 200,40" stroke="#00C9B1" fill="url(#sparkline-gradient)" strokeWidth="2"></path>
-                    <defs><linearGradient id="sparkline-gradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#00C9B1" stopOpacity="0.3"/><stop offset="100%" stopColor="#00C9B1" stopOpacity="0"/></linearGradient></defs>
+                <svg viewBox="0 0 200 50" className="absolute bottom-0 right-0 w-2/3 h-1/2 z-0 opacity-20" preserveAspectRatio="none">
+                    <path d="M0,50 C40,10 60,10 100,30 S160,50 200,40" stroke="#8B5CF6" fill="url(#sparkline-gradient)" strokeWidth="2.5"></path>
+                    <defs><linearGradient id="sparkline-gradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.4"/><stop offset="100%" stopColor="#EC4899" stopOpacity="0"/></linearGradient></defs>
                 </svg>
             </div>
         </div>
@@ -186,8 +212,8 @@ const StatsRow = ({ data, isLoading, loadingMessage }) => {
         <div className="px-4 grid grid-cols-2 gap-3">
             <div className="bg-white rounded-2xl p-4 flex flex-col justify-between" style={{ boxShadow: 'var(--shadow-card)'}}>
                 <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Mention Volume</label>
-                <div className="text-3xl font-bold my-2" style={{fontFamily: 'Plus Jakarta Sans'}}>{formatCount(data.message_count)}</div>
-                <svg viewBox="0 0 100 30" className="w-full h-8"><path d="M0,30 C20,10 40,10 60,20 S80,30 100,25" stroke="#00C9B1" fill="none" strokeWidth="2"/></svg>
+                <div className="text-3xl font-bold my-2 text-slate-900" style={{fontFamily: 'Plus Jakarta Sans'}}>{formatCount(data.message_count)}</div>
+                <svg viewBox="0 0 100 30" className="w-full h-8"><path d="M0,30 C20,10 40,10 60,20 S80,30 100,25" stroke="#8B5CF6" fill="none" strokeWidth="2.5"/></svg>
             </div>
             <div className="bg-white rounded-2xl p-4 flex flex-col justify-between" style={{ boxShadow: 'var(--shadow-card)'}}>
                 <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Anomalies detected</label>
@@ -255,8 +281,8 @@ const BottomNav = () => {
         { to: "/insights", icon: LightbulbIcon, label: "Insights" },
         { to: "/account", icon: UserIcon, label: "Account" },
     ];
-    const activeClass = "text-teal-500";
-    const inactiveClass = "text-gray-400";
+    const activeClass = "text-purple-600 font-bold";
+    const inactiveClass = "text-gray-400 font-normal";
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around pb-safe z-20" style={{maxWidth: '390px', margin: '0 auto'}}>
@@ -277,7 +303,7 @@ const Toast = ({ message, show }) => (
 );
 
 // --- APP LAYOUT & ROUTING ---
-const AppLayout = ({ username, error, isDemoMode, setIsDemoMode, handleLogout, insightData, setInsightData }) => (
+const AppLayout = ({ username, user, liveChannel, setLiveChannel, error, isDemoMode, setIsDemoMode, handleLogout, insightData, setInsightData }) => (
     <div className="bg-gray-50 min-h-screen pb-24" style={{ maxWidth: '390px', margin: '0 auto' }}>
         <Toast message={error} show={!!error} />
         {isDemoMode && (
@@ -298,9 +324,9 @@ const AppLayout = ({ username, error, isDemoMode, setIsDemoMode, handleLogout, i
                 </button>
             </div>
         )}
-        {username && <Header username={username} />}
+        {username && <Header username={username} user={user} liveChannel={liveChannel} />}
         <main>
-            <Outlet context={{ handleLogout, isDemoMode, setIsDemoMode, username, API_URL, MOCK_DATA, insightData, setInsightData }} />
+            <Outlet context={{ handleLogout, isDemoMode, setIsDemoMode, username, user, liveChannel, setLiveChannel, API_URL, MOCK_DATA, insightData, setInsightData }} />
         </main>
         <BottomNav />
     </div>
@@ -308,6 +334,17 @@ const AppLayout = ({ username, error, isDemoMode, setIsDemoMode, handleLogout, i
 
 const StreamlyApp = () => {
     const [username, setUsername] = useState(localStorage.getItem("streamly_username"));
+    const [liveChannel, setLiveChannel] = useState(() => {
+        return localStorage.getItem("streamly_live_channel") || "metropolitan.id";
+    });
+    const [user, setUser] = useState(() => {
+        try {
+            const raw = localStorage.getItem("streamly_user");
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    });
     const [error, setError] = useState(null);
     const [isDemoMode, setIsDemoMode] = useState(() => {
         const saved = localStorage.getItem("streamly_demo_mode");
@@ -318,10 +355,17 @@ const StreamlyApp = () => {
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
-    const handleLoginSuccess = (loggedInUsername, demo = false) => {
+    const handleLoginSuccess = (loggedInUsername, demo = false, userProfile = null, targetLiveChannel = null) => {
         localStorage.setItem("streamly_username", loggedInUsername);
         localStorage.setItem("streamly_demo_mode", demo ? "true" : "false");
+        const channel = targetLiveChannel || localStorage.getItem("streamly_live_channel") || "metropolitan.id";
+        localStorage.setItem("streamly_live_channel", channel);
+        if (userProfile) {
+            localStorage.setItem("streamly_user", JSON.stringify(userProfile));
+            setUser(userProfile);
+        }
         setUsername(loggedInUsername);
+        setLiveChannel(channel);
         setIsDemoMode(demo);
         setInsightData(null);
         navigate('/'); // Redirect to dashboard after login
@@ -330,9 +374,13 @@ const StreamlyApp = () => {
     const handleLogout = () => {
         localStorage.removeItem("streamly_username");
         localStorage.removeItem("streamly_demo_mode");
+        localStorage.removeItem("streamly_user");
+        localStorage.removeItem("streamly_token");
+        localStorage.removeItem("streamly_live_channel");
         setUsername(null);
+        setUser(null);
+        setLiveChannel('metropolitan.id');
         setInsightData(null);
-        // The ProtectedRoute will automatically redirect to /login
     };
     
     useEffect(() => {
@@ -343,7 +391,10 @@ const StreamlyApp = () => {
     }, [error]);
 
     const dashboardProps = {
-        SentimentCard, StatsRow, InsightsSection, MOCK_DATA, API_URL, USERNAME: username,
+        SentimentCard, StatsRow, InsightsSection, MOCK_DATA, API_URL, 
+        USERNAME: username,
+        liveChannel,
+        setLiveChannel,
         isDemoMode, setIsDemoMode, setError, insightData, setInsightData, isLoading, setIsLoading
     };
 
@@ -354,7 +405,7 @@ const StreamlyApp = () => {
                 <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
                 
                 <Route element={<ProtectedRoute user={username} />}>
-                    <Route path="/" element={<AppLayout username={username} error={error} isDemoMode={isDemoMode} setIsDemoMode={setIsDemoMode} handleLogout={handleLogout} insightData={insightData} setInsightData={setInsightData} />}>
+                    <Route path="/" element={<AppLayout username={username} user={user} error={error} isDemoMode={isDemoMode} setIsDemoMode={setIsDemoMode} handleLogout={handleLogout} insightData={insightData} setInsightData={setInsightData} />}>
                         <Route index element={<DashboardPage {...dashboardProps} />} />
                         <Route path="analytics" element={<AnalyticsPage />} />
                         <Route path="insights" element={<InsightsPage />} />

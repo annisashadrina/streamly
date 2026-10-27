@@ -30,12 +30,11 @@ export class TikTokScraper {
     }
 
     private setupEventListeners() {
-        this.connection.on(WebcastEvent.CHAT, async (data) => {
+        this.connection.on(WebcastEvent.CHAT, async (data: any) => {
             const chatLog = {
                 timestamp: new Date().toISOString(),
-                // Using displayId for better readability, but uniqueId is safer for uniqueness
-                user: data.user.displayId, 
-                message: data.comment
+                user: data.user?.displayId || data.user?.uniqueId || data.user?.nickname || 'anonymous',
+                message: data.content || data.comment || ''
             };
 
             console.log(`[SCRAPER][${this.targetUsername}] ${chatLog.user}: ${chatLog.message}`);

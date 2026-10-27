@@ -38,20 +38,59 @@ export class RedisRepository {
         return `streamly:${username}:insights:${batchType}`;
     }
 
+    private getRecentMessagesKey(username: string): string {
+        return `streamly:${username}:recent_messages`;
+    }
+
     // --- Message Queue Methods ---
 
     /**
-     * Pushes a new message to a user's processing queue.
-     * @param username The user being tracked.
+     * Pushes a new message to a user's processing queue and recent live stream list.
+     * @param username The user or channel being tracked.
      * @param message The message object from the scraper.
      */
     async pushMessage(username: string, message: any): Promise<void> {
-        const key = this.getMessageQueueKey(username);
+        const queueKey = this.getMessageQueueKey(username);
+        const recentKey = this.getRecentMessagesKey(username);
         const payload = JSON.stringify(message);
-        await this.client.lpush(key, payload);
-        // Set a TTL on the queue itself to auto-clean if a scraper runs rampant
-        // and the consumer is down. 3 hours.
-        await this.client.expire(key, 3 * 60 * 60);
+
+        const pipeline = this.client.pipeline();
+        // 1. Push to batch processing queue
+        pipeline.lpush(queueKey, payload);
+        pipeline.expire(queueKey, 3 * 60 * 60);
+
+        // 2. Push to recent live messages feed (capped at 50 messages)
+        pipeline.lpush(recentKey, payload);
+        pipeline.ltrim(recentKey, 0, 49);
+        pipeline.expire(recentKey, 3 * 60 * 60);
+
+        await pipeline.exec();
+    }
+
+    /**
+     * Retrieves the latest N live chat messages without clearing the queue.
+     * Used for real-time frontend live feed display.
+     */
+    async getRecentMessages(username: string, count: number = 30): Promise<any[]> {
+        const recentKey = this.getRecentMessagesKey(username);
+        let messagesStr = await this.client.lrange(recentKey, 0, count - 1);
+
+        if (!messagesStr || messagesStr.length === 0) {
+            const queueKey = this.getMessageQueueKey(username);
+            messagesStr = await this.client.lrange(queueKey, 0, count - 1);
+        }
+
+        if (!messagesStr || messagesStr.length === 0) {
+            return [];
+        }
+
+        return messagesStr.map(m => {
+            try {
+                return JSON.parse(m);
+            } catch {
+                return null;
+            }
+        }).filter(Boolean);
     }
 
     /**
