@@ -100,22 +100,24 @@ const SentimentTimeline = ({ data }) => {
 
 const AnalyticsPage = () => {
   const context = useOutletContext() || {};
-  const username = context.username || localStorage.getItem("streamly_username") || 'streamer';
+  const username = context.liveChannel || localStorage.getItem("streamly_live_channel") || 'streamer';
   const [activeWindow, setActiveWindow] = useState('45m');
 
   const currentTimeline = TIMELINE_DATA[activeWindow] || TIMELINE_DATA['45m'];
   const currentTopics = TOP_TOPICS_BY_RANGE[activeWindow] || TOP_TOPICS_BY_RANGE['45m'];
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="secondary-page statistics-page p-4 space-y-4">
       {/* Header */}
       <div>
+        <p className="section-kicker">STREAMLY / STATISTIK</p>
         <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: 'Plus Jakarta Sans' }}>
           Analitik Sesi Live
         </h1>
         <p className="text-xs text-gray-500">
-          Laporan performa & keterlibatan penonton @{username}
+          Gambaran performa dan keterlibatan penonton @{username}
         </p>
+        <p className="simulation-label">Contoh data simulasi · Belum terhubung ke statistik live</p>
       </div>
 
       {/* Window Filter Tabs */}

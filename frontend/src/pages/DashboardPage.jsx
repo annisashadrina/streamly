@@ -22,7 +22,7 @@ const TimeFilterBar = ({ activeTab, setActiveTab, onRefresh, isRefreshing, onTri
             );
           })}
           <div
-            className="absolute top-1 bottom-1 w-1/3 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 rounded-full shadow-sm transition-transform duration-300 ease-out"
+            className="absolute top-1 bottom-1 w-1/3 bg-neutral-900 rounded-full shadow-sm transition-transform duration-300 ease-out"
             style={{ transform: `translateX(${activeIndex * 100}%)` }}
           />
         </div>
@@ -32,7 +32,7 @@ const TimeFilterBar = ({ activeTab, setActiveTab, onRefresh, isRefreshing, onTri
             onClick={onTriggerInstant}
             disabled={isTriggering}
             title="Analisis Sekarang dengan Gemini AI (tanpa tunggu 5 menit)"
-            className="px-3 py-2 rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm hover:from-blue-700 hover:via-purple-700 hover:to-pink-600 transition disabled:opacity-50"
+            className="px-3 py-2 rounded-full bg-neutral-900 text-white font-bold text-xs flex items-center gap-1 shadow-sm hover:bg-neutral-700 transition disabled:opacity-50"
           >
             <span className={isTriggering ? 'animate-spin' : ''}>⚡</span>
             <span className="hidden sm:inline">AI Run</span>
@@ -408,17 +408,18 @@ const DashboardPage = ({
     };
 
     return (
-        <>
+        <div className="analysis-page">
+            <div className="analysis-heading"><div><p className="eyebrow">STREAMLY / ANALISIS LIVE</p><h1>Analisis siaran<span>.</span></h1><p>Pantau percakapan dan pahami audiensmu secara langsung.</p></div><span className="analysis-heading-tag">LIVE INTELLIGENCE ↗</span></div>
             {/* Live Channel Info Banner & Change Target */}
             <div className="px-4 pt-2">
-                <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 border border-purple-100/80 rounded-xl px-3.5 py-2 flex items-center justify-between text-xs">
+                <div className="bg-white border border-stone-200 rounded-xl px-4 py-3 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-1.5">
                         <span className="font-medium text-slate-500">Live Scraper:</span>
-                        <span className="font-bold text-purple-900">@{targetChannel}</span>
+                        <span className="font-bold text-neutral-900">@{targetChannel}</span>
                     </div>
                     <button
                         onClick={() => setIsChangingChannel(!isChangingChannel)}
-                        className="text-[11px] font-bold text-purple-600 hover:text-purple-800 underline"
+                        className="text-[11px] font-bold text-neutral-700 hover:text-neutral-950 underline"
                     >
                         {isChangingChannel ? 'Batal' : 'Ganti Target'}
                     </button>
@@ -435,7 +436,7 @@ const DashboardPage = ({
                         />
                         <button
                             type="submit"
-                            className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-xs rounded-xl hover:from-blue-700 hover:to-purple-700 transition"
+                            className="px-3 py-1.5 bg-neutral-900 text-white font-bold text-xs rounded-xl hover:bg-neutral-700 transition"
                         >
                             Hubungkan
                         </button>
@@ -443,13 +444,17 @@ const DashboardPage = ({
                 )}
             </div>
 
+            <div className="analysis-grid">
+            <div className="analysis-chat">
             {/* Real-time Live Chat Feed Component */}
             <LiveChatFeedWidget
                 targetChannel={targetChannel}
                 apiUrl={API_URL}
                 isDemoMode={isDemoMode}
             />
+            </div>
 
+            <div className="analysis-results">
             <TimeFilterBar
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
@@ -459,7 +464,9 @@ const DashboardPage = ({
                 isTriggering={isTriggering}
             />
             {renderContent()}
-        </>
+            </div>
+            </div>
+        </div>
     );
 };
 

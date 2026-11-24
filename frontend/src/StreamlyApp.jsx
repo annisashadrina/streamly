@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Routes, Route, Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Routes, Route, Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
 import DashboardPage from './pages/DashboardPage';
+import LiveOverviewPage from './pages/LiveOverviewPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import InsightsPage from './pages/InsightsPage';
 import AccountPage from './pages/AccountPage';
@@ -66,9 +67,9 @@ const GlobalStyles = createGlobalStyle`
 
 // --- MOCK DATA ---
 const MOCK_DATA = {
-  "5m": { id: "mock-5m", batch_type: "5m", sentiment_score: 0.85, sentiment_trend: "rising", emerging_topics: ["new feature", "tutorial", "so cool!"], summary: "Audience shows high enthusiasm for a newly demonstrated feature, with many asking for a tutorial.", actionable_insight: "Consider pinning a comment with a link to the feature documentation or a tutorial video.", message_count: 14200, created_at: new Date(Date.now() - 2 * 60 * 1000).toISOString() },
-  "20m": { id: "mock-20m", batch_type: "20m", sentiment_score: 0.72, sentiment_trend: "stable", emerging_topics: ["product quality", "shipping", "discount"], summary: "Viewers are curious about product details and pricing. Multiple requests for discount codes.", actionable_insight: "Announce a limited-time promo code to convert curious viewers into buyers.", message_count: 9800, created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString() },
-  "45m": { id: "mock-45m", batch_type: "45m", sentiment_score: 0.61, sentiment_trend: "falling", emerging_topics: ["slow response", "audio issue", "left stream"], summary: "Technical issues are causing viewer drop-off. Sentiment declining over the session.", actionable_insight: "Address the audio quality issue verbally and consider a brief stream restart if it persists.", message_count: 31400, created_at: new Date(Date.now() - 40 * 60 * 1000).toISOString() }
+  "5m": { id: "mock-5m", batch_type: "5m", sentiment_score: 0.85, sentiment_trend: "rising", emerging_topics: ["fitur baru", "tutorial", "antusiasme penonton"], summary: "Audiens sangat antusias terhadap fitur yang baru diperlihatkan, dan banyak yang meminta tutorial.", actionable_insight: "Sematkan komentar berisi tautan dokumentasi fitur atau video tutorial.", message_count: 14200, created_at: new Date(Date.now() - 2 * 60 * 1000).toISOString() },
+  "20m": { id: "mock-20m", batch_type: "20m", sentiment_score: 0.72, sentiment_trend: "stable", emerging_topics: ["kualitas produk", "pengiriman", "diskon"], summary: "Penonton ingin mengetahui detail dan harga produk. Beberapa meminta kode diskon.", actionable_insight: "Umumkan kode promo dengan waktu terbatas untuk menarik calon pembeli.", message_count: 9800, created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString() },
+  "45m": { id: "mock-45m", batch_type: "45m", sentiment_score: 0.61, sentiment_trend: "falling", emerging_topics: ["respons lambat", "gangguan audio", "penonton meninggalkan siaran"], summary: "Gangguan teknis menyebabkan penonton meninggalkan siaran. Sentimen menurun selama sesi berlangsung.", actionable_insight: "Sampaikan penanganan gangguan audio dan pertimbangkan memulai ulang siaran jika masalah berlanjut.", message_count: 31400, created_at: new Date(Date.now() - 40 * 60 * 1000).toISOString() }
 };
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -111,7 +112,7 @@ const AnimatedCounter = ({ value }) => {
 };
 
 const Header = ({ username, user, liveChannel }) => (
-    <header className="bg-white p-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-100 shadow-xs">
+    <header className="app-header">
         <div className="flex items-center gap-2.5">
             <img 
                 src="/streamly-icon.png" 
@@ -120,14 +121,13 @@ const Header = ({ username, user, liveChannel }) => (
             />
             <div>
                 <div className="flex items-center">
-                    <h1 className="font-extrabold text-xl text-slate-900" style={{ fontFamily: 'Plus Jakarta Sans' }}>Overview</h1>
-                    <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full ml-2 animate-pulse"></div>
+                    <h1 className="font-extrabold text-xl text-slate-900" style={{ fontFamily: 'Plus Jakarta Sans' }}>Streamly</h1>
                 </div>
                 {liveChannel && (
                     <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-ping"></span>
-                        <span className="text-[10px] font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full border border-pink-200/70">
-                            🔴 Live: @{liveChannel}
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span className="text-[10px] font-semibold text-slate-500">
+                            Target: @{liveChannel}
                         </span>
                     </div>
                 )}
@@ -136,9 +136,9 @@ const Header = ({ username, user, liveChannel }) => (
         <div className="flex items-center gap-2.5">
             <div className="text-right">
                 <p className="text-xs font-bold text-slate-800 leading-tight">{user?.fullName || username}</p>
-                <p className="text-[10px] text-purple-600 font-bold capitalize">{user?.role ? user.role.replace('_', ' ') : 'Streamer'}</p>
+                <p className="text-[10px] text-slate-500 font-bold capitalize">{user?.role ? user.role.replace('_', ' ') : 'Streamer'}</p>
             </div>
-            <div className="w-9 h-9 bg-gradient-to-tr from-blue-600 via-purple-600 to-pink-500 rounded-full flex items-center justify-center text-white font-extrabold shadow-sm">
+            <div className="w-9 h-9 bg-neutral-900 rounded-full flex items-center justify-center text-white font-extrabold">
                 {(user?.fullName || username || 'S').charAt(0).toUpperCase()}
             </div>
         </div>
@@ -147,9 +147,9 @@ const Header = ({ username, user, liveChannel }) => (
 
 const TrendBadge = ({ trend, score }) => {
     const trendInfo = {
-        rising: { icon: ArrowUpRightIcon, color: 'primary', text: 'Rising' },
-        falling: { icon: ArrowDownRightIcon, color: 'danger', text: 'Falling' },
-        stable: { icon: ArrowRightIcon, color: 'sub', text: 'Stable' },
+        rising: { icon: ArrowUpRightIcon, color: 'primary', text: 'Naik' },
+        falling: { icon: ArrowDownRightIcon, color: 'danger', text: 'Turun' },
+        stable: { icon: ArrowRightIcon, color: 'sub', text: 'Stabil' },
     };
     const { icon: Icon, color, text } = trendInfo[trend] || trendInfo.stable;
 
@@ -175,7 +175,7 @@ const SentimentCard = ({ data, isLoading, loadingMessage }) => {
         <div className="px-4 pb-2">
             <div className="bg-white rounded-2xl p-5 shadow-lg relative overflow-hidden" style={{ boxShadow: 'var(--shadow-card)'}}>
                 <div className="flex justify-between items-start">
-                    <h2 className="font-bold text-sm" style={{fontFamily: 'Plus Jakarta Sans'}}>Global Sentiment</h2>
+                    <h2 className="font-bold text-sm" style={{fontFamily: 'Plus Jakarta Sans'}}>Sentimen Keseluruhan</h2>
                     {data.sentiment_trend && <TrendBadge trend={data.sentiment_trend} score={data.sentiment_score} />}
                 </div>
                 <div className="my-2">
@@ -196,8 +196,8 @@ const StatsRow = ({ data, isLoading, loadingMessage }) => {
     const formatCount = (num) => num >= 1000 ? `${(num / 1000).toFixed(1)}k` : num;
     const anomalyCount = useMemo(() => {
         if (!data?.emerging_topics) return 0;
-        const negativeKeywords = ["issue", "problem", "slow", "error", "bad", "outage", "left", "boring"];
-        return data.emerging_topics.filter(topic => negativeKeywords.some(kw => topic.includes(kw))).length || 0;
+        const negativeKeywords = ["issue", "problem", "slow", "error", "bad", "outage", "left", "boring", "masalah", "gangguan", "lambat", "buruk", "kecewa", "bosan"];
+        return data.emerging_topics.filter(topic => negativeKeywords.some(kw => topic.toLowerCase().includes(kw))).length || 0;
     }, [data]);
 
     if (isLoading) return (
@@ -211,14 +211,14 @@ const StatsRow = ({ data, isLoading, loadingMessage }) => {
     return (
         <div className="px-4 grid grid-cols-2 gap-3">
             <div className="bg-white rounded-2xl p-4 flex flex-col justify-between" style={{ boxShadow: 'var(--shadow-card)'}}>
-                <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Mention Volume</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Jumlah Komentar</label>
                 <div className="text-3xl font-bold my-2 text-slate-900" style={{fontFamily: 'Plus Jakarta Sans'}}>{formatCount(data.message_count)}</div>
                 <svg viewBox="0 0 100 30" className="w-full h-8"><path d="M0,30 C20,10 40,10 60,20 S80,30 100,25" stroke="#8B5CF6" fill="none" strokeWidth="2.5"/></svg>
             </div>
             <div className="bg-white rounded-2xl p-4 flex flex-col justify-between" style={{ boxShadow: 'var(--shadow-card)'}}>
-                <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Anomalies detected</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Anomali Terdeteksi</label>
                 <div className="text-3xl font-bold my-2 text-red-500" style={{fontFamily: 'Plus Jakarta Sans'}}>{anomalyCount}</div>
-                {anomalyCount > 0 && <div className="text-xs font-bold text-red-500 bg-red-100 rounded-full px-2 py-1 self-start">⚠ Review needed</div>}
+                {anomalyCount > 0 && <div className="text-xs font-bold text-red-500 bg-red-100 rounded-full px-2 py-1 self-start">⚠ Perlu ditinjau</div>}
             </div>
         </div>
     );
@@ -227,24 +227,22 @@ const StatsRow = ({ data, isLoading, loadingMessage }) => {
 const InsightsSection = ({ data, isLoading, loadingMessage }) => {
     if (isLoading) return (
         <div className="p-4 space-y-3">
-            <h2 className="text-lg font-bold mb-3" style={{fontFamily: 'Plus Jakarta Sans'}}>Actionable Insights</h2>
+            <h2 className="text-lg font-bold mb-3" style={{fontFamily: 'Plus Jakarta Sans'}}>Rekomendasi Tindakan</h2>
             <SkeletonPlaceholder className="h-20 w-full">{loadingMessage}</SkeletonPlaceholder>
             <SkeletonPlaceholder className="h-20 w-full" />
         </div>
     );
-    if (!data?.emerging_topics) return null;
+    if (!data) return null;
 
-    const insights = [
-        { topic: data.emerging_topics[0], secondaryTopic: data.emerging_topics[1], insight: data.actionable_insight },
-        { topic: data.emerging_topics[1], secondaryTopic: data.emerging_topics[2], insight: data.actionable_insight }
-    ].filter(i => i.topic);
+    const insights = data.recommendations?.length
+        ? data.recommendations
+        : data.actionable_insight ? [{ topic: data.emerging_topics?.[0] || 'Rekomendasi', action: data.actionable_insight }] : [];
     
     return (
         <div className="p-4">
-            <h2 className="text-lg font-bold mb-3" style={{fontFamily: 'Plus Jakarta Sans'}}>Actionable Insights</h2>
+            <h2 className="text-lg font-bold mb-3" style={{fontFamily: 'Plus Jakarta Sans'}}>Rekomendasi Tindakan</h2>
             <div className="space-y-3">
                 {insights.map((item, index) => (
-                    // 1. Ubah items-center menjadi items-start
                     <div key={index} className="bg-white rounded-xl p-4 flex items-start gap-4 shadow-md hover:-translate-y-0.5 transition-transform" style={{animationDelay: `${index * 80}ms`, boxShadow: 'var(--shadow-card)'}}>
                         
                         {/* 2. Tambahkan shrink-0 dan mt-1 agar ikon lampu tidak gepeng dan posisinya di atas */}
@@ -256,13 +254,13 @@ const InsightsSection = ({ data, isLoading, loadingMessage }) => {
                             {/* Tambahkan mb-1 untuk spasi antar judul dan teks saran */}
                             <div className="text-sm font-bold mb-1">
                                 <span className="text-teal-500">{item.topic}</span>
-                                {item.secondaryTopic && <span className="text-gray-400 font-medium"> · {item.secondaryTopic}</span>}
                             </div>
                             
                             {/* 3. Hapus 'truncate', ganti dengan 'line-clamp-2' (atau line-clamp-3) dan 'leading-relaxed' */}
-                            <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">
-                                {item.insight}
+                            <p className="text-xs text-gray-600 leading-relaxed">
+                                {item.action}
                             </p>
+                            {item.evidence && <p className="mt-2 text-xs text-gray-500 leading-relaxed"><strong>Bukti percakapan:</strong> {item.evidence}</p>}
                         </div>
                         
                         {/* 4. Tambahkan shrink-0 dan mt-2 agar panah chevron posisinya pas */}
@@ -276,20 +274,21 @@ const InsightsSection = ({ data, isLoading, loadingMessage }) => {
 
 const BottomNav = () => {
     const navItems = [
-        { to: "/", icon: HomeIcon, label: "Dashboard" },
-        { to: "/analytics", icon: BarChartIcon, label: "Analytics" },
-        { to: "/insights", icon: LightbulbIcon, label: "Insights" },
-        { to: "/account", icon: UserIcon, label: "Account" },
+        { to: "/", icon: HomeIcon, label: "Beranda" },
+        { to: "/analisis", icon: BarChartIcon, label: "Analisis" },
+        { to: "/analytics", icon: BarChartIcon, label: "Statistik" },
+        { to: "/insights", icon: LightbulbIcon, label: "Riwayat" },
+        { to: "/account", icon: UserIcon, label: "Akun" },
     ];
-    const activeClass = "text-purple-600 font-bold";
-    const inactiveClass = "text-gray-400 font-normal";
+    const activeClass = "active";
+    const inactiveClass = "";
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around pb-safe z-20" style={{maxWidth: '390px', margin: '0 auto'}}>
+        <nav className="app-nav" aria-label="Navigasi utama">
             {navItems.map(({ to, icon: Icon, label }) => (
-                <NavLink key={to} to={to} className={({ isActive }) => cl(['flex flex-col items-center justify-center py-2 flex-1', isActive ? activeClass : inactiveClass])}>
-                    <Icon className="w-6 h-6 mb-1" />
-                    <span className={`text-xs ${cl(['font-bold', 'font-normal'])}`}>{label}</span>
+                <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => cl(['app-nav-link', isActive ? activeClass : inactiveClass])}>
+                    <Icon className="app-nav-icon" />
+                    <span>{label}</span>
                 </NavLink>
             ))}
         </nav>
@@ -303,8 +302,10 @@ const Toast = ({ message, show }) => (
 );
 
 // --- APP LAYOUT & ROUTING ---
-const AppLayout = ({ username, user, liveChannel, setLiveChannel, error, isDemoMode, setIsDemoMode, handleLogout, insightData, setInsightData }) => (
-    <div className="bg-gray-50 min-h-screen pb-24" style={{ maxWidth: '390px', margin: '0 auto' }}>
+const AppLayout = ({ username, user, liveChannel, setLiveChannel, error, isDemoMode, setIsDemoMode, handleLogout, insightData, setInsightData }) => {
+    const { pathname } = useLocation();
+    return (
+    <div className="app-shell min-h-screen pb-24 md:pb-0">
         <Toast message={error} show={!!error} />
         {isDemoMode && (
             <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs py-1.5 px-3 sticky top-0 z-30 font-medium flex items-center justify-between shadow-sm">
@@ -324,13 +325,16 @@ const AppLayout = ({ username, user, liveChannel, setLiveChannel, error, isDemoM
                 </button>
             </div>
         )}
-        {username && <Header username={username} user={user} liveChannel={liveChannel} />}
-        <main>
+        <div className="app-topbar">
+            {username && <Header username={username} user={user} liveChannel={pathname === '/' ? null : liveChannel} />}
+            <BottomNav />
+        </div>
+        <main className="app-main">
             <Outlet context={{ handleLogout, isDemoMode, setIsDemoMode, username, user, liveChannel, setLiveChannel, API_URL, MOCK_DATA, insightData, setInsightData }} />
         </main>
-        <BottomNav />
     </div>
-);
+    );
+};
 
 const StreamlyApp = () => {
     const [username, setUsername] = useState(localStorage.getItem("streamly_username"));
@@ -405,8 +409,9 @@ const StreamlyApp = () => {
                 <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
                 
                 <Route element={<ProtectedRoute user={username} />}>
-                    <Route path="/" element={<AppLayout username={username} user={user} error={error} isDemoMode={isDemoMode} setIsDemoMode={setIsDemoMode} handleLogout={handleLogout} insightData={insightData} setInsightData={setInsightData} />}>
-                        <Route index element={<DashboardPage {...dashboardProps} />} />
+                    <Route path="/" element={<AppLayout username={username} user={user} liveChannel={liveChannel} setLiveChannel={setLiveChannel} error={error} isDemoMode={isDemoMode} setIsDemoMode={setIsDemoMode} handleLogout={handleLogout} insightData={insightData} setInsightData={setInsightData} />}>
+                        <Route index element={<LiveOverviewPage />} />
+                        <Route path="analisis" element={<DashboardPage {...dashboardProps} />} />
                         <Route path="analytics" element={<AnalyticsPage />} />
                         <Route path="insights" element={<InsightsPage />} />
                         <Route path="account" element={<AccountPage />} />

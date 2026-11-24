@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import { id } from 'date-fns/locale';
 
 const TrendIcon = ({ trend }) => {
     if (trend === 'rising') {
         return (
             <span className="inline-flex items-center text-xs font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">
                 <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                Rising
+                Naik
             </span>
         );
     }
@@ -15,14 +16,14 @@ const TrendIcon = ({ trend }) => {
         return (
             <span className="inline-flex items-center text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
                 <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                Falling
+                Turun
             </span>
         );
     }
     return (
         <span className="inline-flex items-center text-xs font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
             <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Stable
+            Stabil
         </span>
     );
 };
@@ -33,7 +34,7 @@ const InsightCard = ({ insight }) => {
     let timeAgo = 'Baru saja';
     try {
         if (insight.created_at) {
-            timeAgo = formatDistanceToNow(new Date(insight.created_at), { addSuffix: true });
+            timeAgo = formatDistanceToNow(new Date(insight.created_at), { addSuffix: true, locale: id });
         }
     } catch (e) {
         timeAgo = 'Baru saja';
@@ -69,6 +70,14 @@ const InsightCard = ({ insight }) => {
                         <p className="text-xs text-amber-800 leading-relaxed font-medium">
                             {insight.actionable_insight || 'Belum ada rekomendasi spesifik.'}
                         </p>
+                        {insight.recommendations?.[0]?.evidence && <p className="mt-1 text-xs text-amber-800"><strong>Bukti percakapan:</strong> {insight.recommendations[0].evidence}</p>}
+                        {insight.recommendations?.slice(1).map((item, index) => (
+                            <div key={index} className="mt-3 text-xs text-amber-800 leading-relaxed">
+                                <p className="font-bold">{item.topic}</p>
+                                <p>{item.action}</p>
+                                {item.evidence && <p className="mt-1"><strong>Bukti percakapan:</strong> {item.evidence}</p>}
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -102,7 +111,7 @@ const InsightsPage = () => {
     const context = useOutletContext() || {};
     const isDemoMode = context.isDemoMode;
     const API_URL = context.API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-    const USERNAME = context.username || localStorage.getItem("streamly_username") || 'streamly_creator';
+    const USERNAME = context.liveChannel || localStorage.getItem("streamly_live_channel") || 'metropolitan.id';
     const MOCK_DATA = context.MOCK_DATA;
 
     const [insights, setInsights] = useState([]);
@@ -123,7 +132,7 @@ const InsightsPage = () => {
         }
 
         try {
-            const response = await fetch(`${API_URL}/insights?username=${USERNAME}`);
+            const response = await fetch(`${API_URL}/insights?username=${encodeURIComponent(USERNAME)}`);
             if (!response.ok) {
                 throw new Error(`Gagal memuat insight (${response.status})`);
             }
@@ -134,20 +143,10 @@ const InsightsPage = () => {
                 .filter(item => item !== null && typeof item === 'object')
                 .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
-            if (insightsArray.length === 0 && MOCK_DATA) {
-                // Jika live belum ada data, tampilkan mock data dengan keterangan
-                setInsights(Object.values(MOCK_DATA));
-            } else {
-                setInsights(insightsArray);
-            }
+            setInsights(insightsArray);
         } catch (err) {
             console.warn("[InsightsPage]", err);
-            // Fallback ke mock data jika API offline
-            if (MOCK_DATA) {
-                setInsights(Object.values(MOCK_DATA));
-            } else {
-                setError(err.message || 'Tidak dapat memuat insight.');
-            }
+            setError(err.message || 'Tidak dapat memuat insight.');
         } finally {
             setIsLoading(false);
         }
@@ -163,15 +162,16 @@ const InsightsPage = () => {
     });
 
     return (
-        <div className="p-4 space-y-4">
+        <div className="secondary-page history-page p-4 space-y-4">
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
+                    <p className="section-kicker">STREAMLY / RIWAYAT</p>
                     <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: 'Plus Jakarta Sans' }}>
-                        Histori Insights
+                        Riwayat Analisis
                     </h1>
                     <p className="text-xs text-gray-500">
-                        Kompilasi ringkasan cerdas Gemini AI
+                        Ringkasan analisis untuk @{USERNAME}{isDemoMode ? ' · Data simulasi' : ''}
                     </p>
                 </div>
                 <button
@@ -214,7 +214,7 @@ const InsightsPage = () => {
                     {error}
                 </div>
             ) : filteredInsights.length > 0 ? (
-                <div className="space-y-3">
+                <div className="history-grid">
                     {filteredInsights.map((insight, idx) => (
                         <InsightCard key={insight.id || `${insight.batch_type}-${idx}`} insight={insight} />
                     ))}

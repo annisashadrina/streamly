@@ -94,7 +94,7 @@ const LoginPage = ({ onLoginSuccess }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-indigo-50/30 flex flex-col justify-center items-center p-4 selection:bg-purple-600 selection:text-white">
+        <div className="login-screen min-h-screen flex flex-col justify-center items-center p-4 selection:bg-neutral-900 selection:text-white">
             <div className="w-full max-w-sm sm:max-w-md">
                 
                 {/* Brand Logo & Header */}

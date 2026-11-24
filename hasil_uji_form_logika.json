@@ -1,0 +1,202 @@
+[
+  {
+    "id": "L01",
+    "error": "Silakan masukkan Username atau Email Anda.",
+    "requests": [],
+    "loggedIn": false
+  },
+  {
+    "id": "L02",
+    "error": "Silakan masukkan Username atau Email Anda.",
+    "requests": [],
+    "loggedIn": false
+  },
+  {
+    "id": "L03",
+    "error": "Silakan masukkan Username atau Email Anda.",
+    "requests": [],
+    "loggedIn": false
+  },
+  {
+    "id": "L04",
+    "error": "Silakan masukkan Kata Sandi Anda.",
+    "requests": [],
+    "loggedIn": false
+  },
+  {
+    "id": "L05",
+    "error": "Password yang Anda masukkan salah.",
+    "requests": [
+      {
+        "usernameOrEmail": "aryo_streamer",
+        "password": "sandi_salah_987",
+        "tiktokUsername": "metropolitan.id"
+      }
+    ],
+    "loggedIn": false
+  },
+  {
+    "id": "L06",
+    "error": "Pengguna tidak ditemukan (simulasi).",
+    "requests": [
+      {
+        "usernameOrEmail": "akun_tidak_terdaftar_987",
+        "password": "password123",
+        "tiktokUsername": "metropolitan.id"
+      }
+    ],
+    "loggedIn": false
+  },
+  {
+    "id": "L07",
+    "error": "Pengguna tidak ditemukan (simulasi).",
+    "requests": [
+      {
+        "usernameOrEmail": "nama@@contoh..com",
+        "password": "password123",
+        "tiktokUsername": "metropolitan.id"
+      }
+    ],
+    "loggedIn": false
+  },
+  {
+    "id": "L08",
+    "error": "Password yang Anda masukkan salah.",
+    "requests": [
+      {
+        "usernameOrEmail": "aryo_streamer",
+        "password": "   ",
+        "tiktokUsername": "metropolitan.id"
+      }
+    ],
+    "loggedIn": false
+  },
+  {
+    "id": "T01",
+    "error": "",
+    "requests": [
+      {
+        "usernameOrEmail": "aryo_streamer",
+        "password": "password123",
+        "tiktokUsername": "nama akun"
+      }
+    ],
+    "loggedIn": true
+  },
+  {
+    "id": "T02",
+    "error": "",
+    "requests": [
+      {
+        "usernameOrEmail": "aryo_streamer",
+        "password": "password123",
+        "tiktokUsername": "nama#akun"
+      }
+    ],
+    "loggedIn": true
+  },
+  {
+    "id": "T03",
+    "error": "",
+    "requests": [
+      {
+        "usernameOrEmail": "aryo_streamer",
+        "password": "password123",
+        "tiktokUsername": "https://www.tiktok.com/@contoh"
+      }
+    ],
+    "loggedIn": true
+  },
+  {
+    "id": "T04",
+    "error": "",
+    "requests": [
+      {
+        "usernameOrEmail": "aryo_streamer",
+        "password": "password123",
+        "tiktokUsername": "@contoh"
+      }
+    ],
+    "loggedIn": true
+  },
+  {
+    "id": "T07",
+    "error": "",
+    "requests": [
+      {
+        "usernameOrEmail": "aryo_streamer",
+        "password": "password123",
+        "tiktokUsername": "aryo_streamer"
+      }
+    ],
+    "loggedIn": true
+  },
+  {
+    "id": "G01",
+    "error": "",
+    "requests": [],
+    "changed": false
+  },
+  {
+    "id": "G02",
+    "error": "",
+    "requests": [],
+    "changed": false
+  },
+  {
+    "id": "G03",
+    "error": "",
+    "requests": [],
+    "changed": false
+  },
+  {
+    "id": "G04",
+    "error": "Koneksi simulasi gagal",
+    "requests": [
+      {
+        "channel": "nama akun"
+      }
+    ],
+    "changed": false
+  },
+  {
+    "id": "G05",
+    "error": "Koneksi simulasi gagal",
+    "requests": [
+      {
+        "channel": "nama#akun"
+      }
+    ],
+    "changed": false
+  },
+  {
+    "id": "G06",
+    "error": "Koneksi simulasi gagal",
+    "requests": [
+      {
+        "channel": "https://www.tiktok.com/@contoh"
+      }
+    ],
+    "changed": false
+  },
+  {
+    "id": "G07",
+    "error": "Koneksi simulasi gagal",
+    "requests": [
+      {
+        "channel": "@contoh"
+      }
+    ],
+    "changed": false
+  },
+  {
+    "id": "G08",
+    "error": "Koneksi simulasi gagal",
+    "requests": [
+      {
+        "channel": "akun_tidak_ada_987654321"
+      }
+    ],
+    "changed": false
+  }
+]

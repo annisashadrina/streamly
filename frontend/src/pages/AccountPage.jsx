@@ -53,14 +53,15 @@ const AccountPage = () => {
     };
 
     return (
-        <div className="p-4 space-y-4">
+        <div className="secondary-page account-page p-4 space-y-4">
             {/* Page Title */}
             <div>
+                <p className="section-kicker">STREAMLY / AKUN</p>
                 <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: 'Plus Jakarta Sans' }}>
                     Profil & Sistem
                 </h1>
                 <p className="text-xs text-gray-500">
-                    Detail autentikasi akun database MySQL dan arsitektur backend Streamly
+                    Kelola profil dan pengaturan pengalaman Streamly kamu.
                 </p>
             </div>
 

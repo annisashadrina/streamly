@@ -47,6 +47,25 @@ describe('GeminiAnalyzer (Temporal Zoom Architecture)', () => {
 
     // --- TEST CASE: 5 MINUTE BATCH (RAW DATA) ---
     describe('5m Batch Analysis', () => {
+        it('preserves distinct recommendations and their evidence', async () => {
+            const recommendations = [
+                { topic: 'Ukuran L jaket Luna', action: 'Jelaskan apakah jaket Luna ukuran L tersedia.', evidence: 'Ada jaket Luna ukuran L?' },
+                { topic: 'Harga sepatu Neo', action: 'Sebutkan harga sepatu Neo.', evidence: 'Harga sepatu Neo berapa?' },
+            ];
+            mockGenerativeModel.generateContent.mockResolvedValue({ response: { text: () => JSON.stringify({ ...MOCK_5M_AI_RESPONSE, recommendations }) } });
+            const result = await analyzer.analyze('uji', '5m', { messages: [{ user: 'a', message: 'Ada jaket Luna ukuran L?' }] });
+            expect(result?.insight.recommendations).toEqual(recommendations);
+            expect(result?.insight.actionable_insight).toBe(recommendations[0].action);
+            expect(mockGenerativeModel.generateContent.mock.calls[0][0]).toContain('Klaim "paling banyak"');
+        });
+
+        it('shows an actual question when the model is unavailable', async () => {
+            mockGenerativeModel.generateContent.mockRejectedValue(new Error('offline'));
+            const result = await analyzer.analyze('uji', '5m', { messages: [{ user: 'a', message: 'Jaket Luna ukuran L ada?' }] });
+            expect(result?.insight.recommendations?.[0].evidence).toBe('Jaket Luna ukuran L ada?');
+            expect(result?.insight.actionable_insight).toContain('Tanggapi pertanyaan');
+        });
+
         it('should transform raw messages into a structured insight', async () => {
             const messages = [
                 { user: 'rio', message: 'Keren banget fiturnya!' },
@@ -65,6 +84,7 @@ describe('GeminiAnalyzer (Temporal Zoom Architecture)', () => {
             expect(mockGenerativeModel.generateContent).toHaveBeenCalledWith(
                 expect.stringContaining('Keren banget fiturnya!')
             );
+            expect(mockGenerativeModel.generateContent.mock.calls[0][0]).toContain('seluruh isi teks yang ditujukan kepada pengguna dalam bahasa Indonesia');
         });
     });
 
@@ -97,6 +117,7 @@ describe('GeminiAnalyzer (Temporal Zoom Architecture)', () => {
             
             // Cek apakah prompt mengandung data JSON dari 5m
             const prompt = mockGenerativeModel.generateContent.mock.calls[0][0];
+            expect(prompt).toContain('seluruh isi teks yang ditujukan kepada pengguna dalam bahasa Indonesia');
             expect(prompt).toContain('Summary 0');
             expect(prompt).toContain('Summary 3');
         });
@@ -135,6 +156,7 @@ describe('GeminiAnalyzer (Temporal Zoom Architecture)', () => {
             expect(result?.insight.batch_type).toBe('45m');
             
             const prompt = mockGenerativeModel.generateContent.mock.calls[0][0];
+            expect(prompt).toContain('seluruh isi teks yang ditujukan kepada pengguna dalam bahasa Indonesia');
             expect(prompt).toContain('First Half Stable');
             expect(prompt).toContain('Last Moment Peak');
         });
